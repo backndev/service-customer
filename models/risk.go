@@ -5,6 +5,6 @@ type RiskProfile struct {
 	MmPercent    float32 `json:"mm-percent"`
 	BondPercent  float32 `json:"bond-percent"`
 	StockPercent float32 `json:"stock-percent"`
-	UserId       uint    `json:"user-id"`
+	UserId       uint    `json:"user_id"`
 	User         User    `json:"user" gorm:"foreignKey:UserId"`
 }

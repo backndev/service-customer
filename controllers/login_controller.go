@@ -10,26 +10,31 @@ import (
 )
 
 func Login(c *fiber.Ctx) error {
-	var db = database.DB
+	var data map[string]string
+	db := database.DB
 
-	var user models.User
-	if err := c.BodyParser(&user); err != nil {
+	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
+	var user models.User
 
-	db.Where("Name = ?", user.Name).First(&user)
+	db.Where("name = ?", data["name"]).First(&user)
 
 	if user.Id == 0 {
-		c.Status(400)
-		return c.JSON(fiber.Map{
-			"message": "name not found",
+		return c.Status(400).JSON(models.Result{
+			Status:  "error",
+			Code:    500,
+			Message: "Name not found",
+			Data:    nil,
 		})
 	}
 
-	if err := user.ComparePassword(user.Password); err != nil {
-		c.Status(400)
-		return c.JSON(fiber.Map{
-			"message": "incorrect password",
+	if err := user.ComparePassword(data["password"]); err != nil {
+		return c.Status(500).JSON(models.Result{
+			Status:  "error",
+			Code:    400,
+			Message: "incorrect password",
+			Data:    nil,
 		})
 	}
 
@@ -48,7 +53,10 @@ func Login(c *fiber.Ctx) error {
 
 	c.Cookie(&cookie)
 
-	return c.JSON(fiber.Map{
-		"message": "success",
+	return c.Status(200).JSON(models.Result{
+		Status:  "success",
+		Code:    200,
+		Message: "User login successfully",
+		Data:    user,
 	})
 }
